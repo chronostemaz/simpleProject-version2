@@ -9,9 +9,14 @@ class RightBracketSeq:
     - balance_mask ([int]): Маска баланса скобок.
 
     Методы:
-    - __init__(self, seq_to_analyze: str = ''): Конструктор класса. Инициализирует атрибуты объекта.
-    - is_valid(self): Проверяет, является ли последовательность ПСП.
-    - moves_required(self): Возвращает количество ходов, необходимых для преобразования в ПСП.
+    - calc_balance_brackets(seq_to_analyze: str, balance=0): статический метод-генератор,
+    который генерурует значение баланса скобок в текущем элементе последовательности seq_to_analyze: str, можно
+    передать начальное значение баланса
+    - __init__(self, seq_to_analyze: str): Конструктор класса. Инициализирует атрибуты объекта.
+    - is_cbs(self, lisp_reference: str = ''): Проверяет, является ли последовательность ПСП, если не передан атрибут
+    lisp_reference, то определяет возможность ПСП из self._seq
+    - need_to_move(self, lisp_reference: str = ''): Возвращает количество ходов, необходимых для преобразования в ПСП.
+    Если не передан атрибут lisp_reference, то определяет количество ходов ПСП из self._seq
     - __repr__(self): Возвращает строковое представление объекта.
 
     Пример использования:
@@ -74,23 +79,31 @@ class RightBracketSeq:
             self._is_cbs = self.is_cbs(value)
             self._amount_moves_to_cbs = self.need_to_move(value)
 
-    def is_cbs(self, lisp_reference: str):
+    def is_cbs(self, lisp_reference: str = ''):
         """
-        Проверяет, является ли последовательность ПСП.
+        Проверяет, является ли последовательность ПСП. Если не передано значение lisp_reference, вычисляется для
+        последовательности из атрибута объекта класса self._seq
 
         Возвращает:
         True, если последовательность является ПСП, иначе False.
         """
-        return list(self._balance_mask)[-1] == 0
+        if lisp_reference == '':
+            return list(self._balance_mask)[-1] == 0
+        else:
+            return list(self._calc_balance_brackets(lisp_reference))[-1] == 0
 
-    def need_to_move(self, lisp_reference: str):
+    def need_to_move(self, lisp_reference: str = ''):
         """
-        Возвращает количество ходов, необходимых для преобразования в ПСП.
+        Возвращает количество ходов, необходимых для преобразования в ПСП. Если не передано значение lisp_reference,
+        вычисляется для последовательности из атрибута объекта класса self._seq
 
         Возвращает:
         Количество ходов, необходимых для преобразования в ПСП.
         """
-        return abs(min(self._balance_mask, default=0))
+        if lisp_reference == '':
+            return abs(min(self._balance_mask, default=0))
+        else:
+            return abs(min(self._calc_balance_brackets(lisp_reference)))
 
     def __str__(self):
         """
