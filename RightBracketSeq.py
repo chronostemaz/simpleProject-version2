@@ -27,6 +27,7 @@ class RightBracketSeq:
         Параметры:
         - seq_to_analyze (str): Последовательность скобок для анализа (по умолчанию - пустая строка).
         """
+        self._balance_mask = None
         self.seq = seq_to_analyze
 
     @staticmethod
@@ -46,7 +47,7 @@ class RightBracketSeq:
                 balance += 1
             elif char == ')':
                 balance -= 1
-            else:
+            elif char != "":
                 raise AttributeError()
             yield balance
 
@@ -67,37 +68,35 @@ class RightBracketSeq:
         Параметры:
         - value (str): Последовательность скобок для анализа.
         """
-        self._seq = value
-        self._is_cbs = self.is_valid()
-        self._amount_moves_to_cbs = self.moves_required()
+        if value != '':
+            self._seq = value
+            self._balance_mask = [_ for _ in self._calc_balance_brackets(value)]
+            self._is_cbs = self.is_cbs(value)
+            self._amount_moves_to_cbs = self.need_to_move(value)
 
-    def is_valid(self):
+    def is_cbs(self, lisp_reference: str):
         """
         Проверяет, является ли последовательность ПСП.
 
         Возвращает:
         True, если последовательность является ПСП, иначе False.
         """
-        self._balance_mask = list(self._calc_balance_brackets(self._seq))
-        return self._balance_mask[-1] == 0
+        return list(self._balance_mask)[-1] == 0
 
-    def moves_required(self):
+    def need_to_move(self, lisp_reference: str):
         """
         Возвращает количество ходов, необходимых для преобразования в ПСП.
 
         Возвращает:
         Количество ходов, необходимых для преобразования в ПСП.
         """
-        if self._is_cbs:
-            return abs(min(self._balance_mask, default=0))
-        else:
-            return 0
+        return abs(min(self._balance_mask, default=0))
 
-    def __repr__(self):
+    def __str__(self):
         """
         Возвращает строковое представление объекта.
         """
         return f'Последовательность "{self.seq}"\n' \
                f'Маска {self._balance_mask}\n' \
                f'Возможность ПСП? {"да" if self._is_cbs else "нет"}\n' \
-               f'Ходов для изменения в ПСП {self._amount_moves_to_cbs}\n' if self._is_cbs else ''
+               f'{f"Ходов для изменения в ПСП {self._amount_moves_to_cbs}" if self._is_cbs else ""}\n'
